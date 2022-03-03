@@ -38,6 +38,8 @@ To add this generated code into the IBM Terraform Provider:
 
     "ibm_toolchain_tool_pipeline": ibmtoolchainapi.ResourceIbmToolchainToolPipeline(),
 
+    "ibm_toolchain_tool_insights": ibmtoolchainapi.ResourceIbmToolchainToolInsights(),
+
 ```
 
 ### Changes to `config.go`
