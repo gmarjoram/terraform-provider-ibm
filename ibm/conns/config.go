@@ -105,8 +105,8 @@ import (
 	"github.com/IBM/event-notifications-go-admin-sdk/eventnotificationsv1"
 	"github.com/IBM/eventstreams-go-sdk/pkg/schemaregistryv1"
 	"github.com/IBM/scc-go-sdk/posturemanagementv1"
-
 	"github.ibm.com/org-ids/tekton-pipeline-go-sdk/continuousdeliverypipelinev2"
+	"github.ibm.com/org-ids/toolchain-go-sdk/ibmtoolchainapiv2"
 )
 
 // RetryAPIDelay - retry api delay
@@ -275,6 +275,7 @@ type ClientSession interface {
 	ContextBasedRestrictionsV1() (*contextbasedrestrictionsv1.ContextBasedRestrictionsV1, error)
 	PostureManagementV2() (*posturemanagementv2.PostureManagementV2, error)
 	ContinuousDeliveryPipelineV2() (*continuousdeliverypipelinev2.ContinuousDeliveryPipelineV2, error)
+	IbmToolchainApiV2() (*ibmtoolchainapiv2.IbmToolchainApiV2, error)
 }
 
 type clientSession struct {
@@ -552,9 +553,15 @@ type clientSession struct {
 	contextBasedRestrictionsClient    *contextbasedrestrictionsv1.ContextBasedRestrictionsV1
 	contextBasedRestrictionsClientErr error
 
+
 	// Tekton Pipeline
 	continuousDeliveryPipelineClient    *continuousdeliverypipelinev2.ContinuousDeliveryPipelineV2
 	continuousDeliveryPipelineClientErr error
+
+	// Toolchain
+	ibmToolchainApiClient    *ibmtoolchainapiv2.IbmToolchainApiV2
+	ibmToolchainApiClientErr error
+
 }
 
 // AppIDAPI provides AppID Service APIs ...
@@ -1047,9 +1054,15 @@ func (session clientSession) ContextBasedRestrictionsV1() (*contextbasedrestrict
 	return session.contextBasedRestrictionsClient, session.contextBasedRestrictionsClientErr
 }
 
+
 // Continuous Delivery Pipeline
 func (session clientSession) ContinuousDeliveryPipelineV2() (*continuousdeliverypipelinev2.ContinuousDeliveryPipelineV2, error) {
 	return session.continuousDeliveryPipelineClient, session.continuousDeliveryPipelineClientErr
+
+// IBM Toolchain API
+func (session clientSession) IbmToolchainApiV2() (*ibmtoolchainapiv2.IbmToolchainApiV2, error) {
+	return session.ibmToolchainApiClient, session.ibmToolchainApiClientErr
+
 }
 
 // ClientSession configures and returns a fully initialized ClientSession
@@ -1359,6 +1372,24 @@ func (c *Config) ClientSession() (interface{}, error) {
 		}
 	}
 
+	// Construct an "options" struct for creating the service client.
+	ibmToolchainApiClientOptions := &ibmtoolchainapiv2.IbmToolchainApiV2Options{
+		Authenticator: authenticator,
+	}
+
+	// Construct the service client.
+	session.ibmToolchainApiClient, err = ibmtoolchainapiv2.NewIbmToolchainApiV2(ibmToolchainApiClientOptions)
+	if err == nil {
+		// Enable retries for API calls
+		session.ibmToolchainApiClient.Service.EnableRetries(c.RetryCount, c.RetryDelay)
+		// Add custom header for analytics
+		session.ibmToolchainApiClient.SetDefaultHeaders(gohttp.Header{
+			"X-Original-User-Agent": {fmt.Sprintf("terraform-provider-ibm/%s", version.Version)},
+		})
+	} else {
+		session.ibmToolchainApiClientErr = fmt.Errorf("Error occurred while configuring IBM Toolchain API service: %q", err)
+	}
+
 	// APPID Service
 	appIDEndpoint := fmt.Sprintf("https://%s.appid.cloud.ibm.com", c.Region)
 	if c.Visibility == "private" {
@@ -1568,18 +1599,8 @@ func (c *Config) ClientSession() (interface{}, error) {
 
 	// VPC Service
 	vpcurl := ContructEndpoint(fmt.Sprintf("%s.iaas", c.Region), fmt.Sprintf("%s/v1", cloudEndpoint))
-	if c.Visibility == "private" {
-		if c.Region == "us-south" || c.Region == "us-east" {
-			vpcurl = ContructEndpoint(fmt.Sprintf("%s.private.iaas", c.Region), fmt.Sprintf("%s/v1", cloudEndpoint))
-		} else {
-			session.vpcErr = fmt.Errorf("[ERROR] VPC supports private endpoints only in us-south and us-east")
-		}
-	}
-	if c.Visibility == "public-and-private" {
-		if c.Region == "us-south" || c.Region == "us-east" {
-			vpcurl = ContructEndpoint(fmt.Sprintf("%s.private.iaas", c.Region), fmt.Sprintf("%s/v1", cloudEndpoint))
-		}
-		vpcurl = ContructEndpoint(fmt.Sprintf("%s.iaas", c.Region), fmt.Sprintf("%s/v1", cloudEndpoint))
+	if c.Visibility == "private" || c.Visibility == "public-and-private" {
+		vpcurl = ContructEndpoint(fmt.Sprintf("%s.private.iaas", c.Region), fmt.Sprintf("%s/v1", cloudEndpoint))
 	}
 	if fileMap != nil && c.Visibility != "public-and-private" {
 		vpcurl = fileFallBack(fileMap, c.Visibility, "IBMCLOUD_IS_NG_API_ENDPOINT", c.Region, vpcurl)

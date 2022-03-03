@@ -18,14 +18,14 @@ require (
 	github.com/IBM/ibm-cos-sdk-go-config v1.2.0
 	github.com/IBM/ibm-hpcs-tke-sdk v0.0.0-20211109141421-a4b61b05f7d1
 	github.com/IBM/keyprotect-go-client v0.7.0
-	github.com/IBM/networking-go-sdk v0.23.1
+	github.com/IBM/networking-go-sdk v0.26.0
 	github.com/IBM/platform-services-go-sdk v0.22.6
 	github.com/IBM/push-notifications-go-sdk v0.0.0-20210310100607-5790b96c47f5
 	github.com/IBM/scc-go-sdk v1.3.4
 	github.com/IBM/scc-go-sdk/v3 v3.1.0
 	github.com/IBM/schematics-go-sdk v0.1.3
 	github.com/IBM/secrets-manager-go-sdk v0.1.19
-	github.com/IBM/vpc-go-sdk v0.14.0
+	github.com/IBM/vpc-go-sdk v0.16.0
 	github.com/PromonLogicalis/asn1 v0.0.0-20190312173541-d60463189a56 // indirect
 	github.com/ScaleFT/sshkeys v0.0.0-20200327173127-6142f742bca5
 	github.com/Shopify/sarama v1.29.1
@@ -52,6 +52,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
 	github.com/softlayer/softlayer-go v1.0.3
 	github.ibm.com/org-ids/tekton-pipeline-go-sdk v0.0.1
+	github.ibm.com/org-ids/toolchain-go-sdk v0.0.2
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
 	golang.org/x/sys v0.0.0-20211004093028-2c5d950f24ef // indirect
 	golang.org/x/tools v0.1.7 // indirect
@@ -63,6 +64,4 @@ replace github.com/softlayer/softlayer-go v1.0.3 => github.com/IBM-Cloud/softlay
 
 replace github.com/dgrijalva/jwt-go v3.2.0+incompatible => github.com/golang-jwt/jwt v3.2.1+incompatible
 
-replace github.ibm.com/org-ids/tekton-pipeline-go-sdk => ../../../go/src/tekton-pipeline-go-sdk
-
-replace github.com/SidneyJiang/terraform-provider-ibm => ../terraform-provider-ibm
+replace github.ibm.com/MARJORAM/toolchain-go-sdk => ../toolchain-go-sdk
