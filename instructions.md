@@ -21,26 +21,7 @@ To add this generated code into the IBM Terraform Provider:
 ```
 
 - Add the following entries to `ResourcesMap`:
-```
 
-    "ibm_tekton_pipeline_definition": continuousdeliverypipeline.ResourceIBMTektonPipelineDefinition(),
-    "ibm_tekton_pipeline_trigger_property": continuousdeliverypipeline.ResourceIBMTektonPipelineTriggerProperty(),
-    "ibm_tekton_pipeline_property": continuousdeliverypipeline.ResourceIBMTektonPipelineProperty(),
-    "ibm_tekton_pipeline_trigger": continuousdeliverypipeline.ResourceIBMTektonPipelineTrigger(),
-```
-
-- Add the following entries to `globalValidatorDict`:
-``` 
-    "ibm_tekton_pipeline_definition": continuousdeliverypipeline.ResourceIBMTektonPipelineDefinitionValidator(),
-    "ibm_tekton_pipeline_trigger_property": continuousdeliverypipeline.ResourceIBMTektonPipelineTriggerPropertyValidator(),
-    "ibm_tekton_pipeline_property": continuousdeliverypipeline.ResourceIBMTektonPipelinePropertyValidator(),
-    "ibm_tekton_pipeline_trigger": continuousdeliverypipeline.ResourceIBMTektonPipelineTriggerValidator(),
-
-    "ibm_toolchain_tool_pipeline": ibmtoolchainapi.ResourceIbmToolchainToolPipeline(),
-
-    "ibm_toolchain_tool_insights": ibmtoolchainapi.ResourceIbmToolchainToolInsights(),
-
-```
 
 ### Changes to `config.go`
 
