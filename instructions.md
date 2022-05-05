@@ -7,7 +7,6 @@ To add this generated code into the IBM Terraform Provider:
 - Add the following entry to `import`:
 ```
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/service/toolchain"
-
 ```
 
 - Add the following entries to `ResourcesMap`:
