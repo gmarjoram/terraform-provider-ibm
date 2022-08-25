@@ -35,8 +35,6 @@ In addition to all argument references listed, you can access the following attr
 
 * `id` - The unique identifier of the cd_toolchain_tool_devopsinsights.
 * `crn` - (String) Tool CRN.
-* `tool_id` - (String) Tool ID.
-  * Constraints: The maximum length is `36` characters. The minimum length is `36` characters. The value must match regular expression `/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[89abAB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$/`.
 * `href` - (String) URI representing the tool.
 * `referent` - (List) Information on URIs to access this resource through the UI or API.
 Nested scheme for **referent**:
@@ -46,6 +44,8 @@ Nested scheme for **referent**:
 * `state` - (String) Current configuration state of the tool.
   * Constraints: Allowable values are: `configured`, `configuring`, `misconfigured`, `unconfigured`.
 * `toolchain_crn` - (String) CRN of toolchain which the tool is bound to.
+* `tool_id` - (String) Tool ID.
+  * Constraints: The maximum length is `36` characters. The minimum length is `36` characters. The value must match regular expression `/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[89abAB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$/`.
 * `updated_at` - (String) Latest tool update timestamp.
 
 ## Provider Configuration

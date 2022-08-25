@@ -19,10 +19,10 @@ import (
 
 func ResourceIBMCdToolchainToolDevopsinsights() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: ResourceIBMCdToolchainToolDevopsinsightsCreate,
-		ReadContext:   ResourceIBMCdToolchainToolDevopsinsightsRead,
-		UpdateContext: ResourceIBMCdToolchainToolDevopsinsightsUpdate,
-		DeleteContext: ResourceIBMCdToolchainToolDevopsinsightsDelete,
+		CreateContext: resourceIBMCdToolchainToolDevopsinsightsCreate,
+		ReadContext:   resourceIBMCdToolchainToolDevopsinsightsRead,
+		UpdateContext: resourceIBMCdToolchainToolDevopsinsightsUpdate,
+		DeleteContext: resourceIBMCdToolchainToolDevopsinsightsDelete,
 		Importer:      &schema.ResourceImporter{},
 
 		Schema: map[string]*schema.Schema{
@@ -114,7 +114,7 @@ func ResourceIBMCdToolchainToolDevopsinsightsValidator() *validate.ResourceValid
 			ValidateFunctionIdentifier: validate.ValidateRegexpLen,
 			Type:                       validate.TypeString,
 			Optional:                   true,
-			Regexp:                     `^([^\\x00-\\x7F]|[a-zA-Z0-9-._ ])+$`,
+			Regexp:                     `^([^\x00-\x7F]|[a-zA-Z0-9-._ ])+$`,
 			MinValueLength:             0,
 			MaxValueLength:             128,
 		},
@@ -124,7 +124,7 @@ func ResourceIBMCdToolchainToolDevopsinsightsValidator() *validate.ResourceValid
 	return &resourceValidator
 }
 
-func ResourceIBMCdToolchainToolDevopsinsightsCreate(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIBMCdToolchainToolDevopsinsightsCreate(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	cdToolchainClient, err := meta.(conns.ClientSession).CdToolchainV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -138,18 +138,18 @@ func ResourceIBMCdToolchainToolDevopsinsightsCreate(context context.Context, d *
 		createToolOptions.SetName(d.Get("name").(string))
 	}
 
-	postToolResponse, response, err := cdToolchainClient.CreateToolWithContext(context, createToolOptions)
+	toolchainToolPost, response, err := cdToolchainClient.CreateToolWithContext(context, createToolOptions)
 	if err != nil {
 		log.Printf("[DEBUG] CreateToolWithContext failed %s\n%s", err, response)
 		return diag.FromErr(fmt.Errorf("CreateToolWithContext failed %s\n%s", err, response))
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s", *createToolOptions.ToolchainID, *postToolResponse.ID))
+	d.SetId(fmt.Sprintf("%s/%s", *createToolOptions.ToolchainID, *toolchainToolPost.ID))
 
-	return ResourceIBMCdToolchainToolDevopsinsightsRead(context, d, meta)
+	return resourceIBMCdToolchainToolDevopsinsightsRead(context, d, meta)
 }
 
-func ResourceIBMCdToolchainToolDevopsinsightsRead(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIBMCdToolchainToolDevopsinsightsRead(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	cdToolchainClient, err := meta.(conns.ClientSession).CdToolchainV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -165,7 +165,7 @@ func ResourceIBMCdToolchainToolDevopsinsightsRead(context context.Context, d *sc
 	getToolByIDOptions.SetToolchainID(parts[0])
 	getToolByIDOptions.SetToolID(parts[1])
 
-	getToolByIDResponse, response, err := cdToolchainClient.GetToolByIDWithContext(context, getToolByIDOptions)
+	toolchainTool, response, err := cdToolchainClient.GetToolByIDWithContext(context, getToolByIDOptions)
 	if err != nil {
 		if response != nil && response.StatusCode == 404 {
 			d.SetId("")
@@ -175,45 +175,45 @@ func ResourceIBMCdToolchainToolDevopsinsightsRead(context context.Context, d *sc
 		return diag.FromErr(fmt.Errorf("GetToolByIDWithContext failed %s\n%s", err, response))
 	}
 
-	if err = d.Set("toolchain_id", getToolByIDResponse.ToolchainID); err != nil {
+	if err = d.Set("toolchain_id", toolchainTool.ToolchainID); err != nil {
 		return diag.FromErr(fmt.Errorf("Error setting toolchain_id: %s", err))
 	}
-	if err = d.Set("name", getToolByIDResponse.Name); err != nil {
+	if err = d.Set("name", toolchainTool.Name); err != nil {
 		return diag.FromErr(fmt.Errorf("Error setting name: %s", err))
 	}
-	if err = d.Set("resource_group_id", getToolByIDResponse.ResourceGroupID); err != nil {
+	if err = d.Set("resource_group_id", toolchainTool.ResourceGroupID); err != nil {
 		return diag.FromErr(fmt.Errorf("Error setting resource_group_id: %s", err))
 	}
-	if err = d.Set("crn", getToolByIDResponse.CRN); err != nil {
+	if err = d.Set("crn", toolchainTool.CRN); err != nil {
 		return diag.FromErr(fmt.Errorf("Error setting crn: %s", err))
 	}
-	if err = d.Set("toolchain_crn", getToolByIDResponse.ToolchainCRN); err != nil {
+	if err = d.Set("toolchain_crn", toolchainTool.ToolchainCRN); err != nil {
 		return diag.FromErr(fmt.Errorf("Error setting toolchain_crn: %s", err))
 	}
-	if err = d.Set("href", getToolByIDResponse.Href); err != nil {
+	if err = d.Set("href", toolchainTool.Href); err != nil {
 		return diag.FromErr(fmt.Errorf("Error setting href: %s", err))
 	}
-	referentMap, err := ResourceIBMCdToolchainToolDevopsinsightsToolReferentToMap(getToolByIDResponse.Referent)
+	referentMap, err := resourceIBMCdToolchainToolDevopsinsightsToolModelReferentToMap(toolchainTool.Referent)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	if err = d.Set("referent", []map[string]interface{}{referentMap}); err != nil {
 		return diag.FromErr(fmt.Errorf("Error setting referent: %s", err))
 	}
-	if err = d.Set("updated_at", flex.DateTimeToString(getToolByIDResponse.UpdatedAt)); err != nil {
+	if err = d.Set("updated_at", flex.DateTimeToString(toolchainTool.UpdatedAt)); err != nil {
 		return diag.FromErr(fmt.Errorf("Error setting updated_at: %s", err))
 	}
-	if err = d.Set("state", getToolByIDResponse.State); err != nil {
+	if err = d.Set("state", toolchainTool.State); err != nil {
 		return diag.FromErr(fmt.Errorf("Error setting state: %s", err))
 	}
-	if err = d.Set("tool_id", getToolByIDResponse.ID); err != nil {
+	if err = d.Set("tool_id", toolchainTool.ID); err != nil {
 		return diag.FromErr(fmt.Errorf("Error setting tool_id: %s", err))
 	}
 
 	return nil
 }
 
-func ResourceIBMCdToolchainToolDevopsinsightsUpdate(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIBMCdToolchainToolDevopsinsightsUpdate(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	cdToolchainClient, err := meta.(conns.ClientSession).CdToolchainV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -242,17 +242,17 @@ func ResourceIBMCdToolchainToolDevopsinsightsUpdate(context context.Context, d *
 	}
 
 	if hasChange {
-		response, err := cdToolchainClient.UpdateToolWithContext(context, updateToolOptions)
+		_, response, err := cdToolchainClient.UpdateToolWithContext(context, updateToolOptions)
 		if err != nil {
 			log.Printf("[DEBUG] UpdateToolWithContext failed %s\n%s", err, response)
 			return diag.FromErr(fmt.Errorf("UpdateToolWithContext failed %s\n%s", err, response))
 		}
 	}
 
-	return ResourceIBMCdToolchainToolDevopsinsightsRead(context, d, meta)
+	return resourceIBMCdToolchainToolDevopsinsightsRead(context, d, meta)
 }
 
-func ResourceIBMCdToolchainToolDevopsinsightsDelete(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIBMCdToolchainToolDevopsinsightsDelete(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	cdToolchainClient, err := meta.(conns.ClientSession).CdToolchainV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -279,7 +279,7 @@ func ResourceIBMCdToolchainToolDevopsinsightsDelete(context context.Context, d *
 	return nil
 }
 
-func ResourceIBMCdToolchainToolDevopsinsightsToolReferentToMap(model *cdtoolchainv2.ToolReferent) (map[string]interface{}, error) {
+func resourceIBMCdToolchainToolDevopsinsightsToolModelReferentToMap(model *cdtoolchainv2.ToolModelReferent) (map[string]interface{}, error) {
 	modelMap := make(map[string]interface{})
 	if model.UIHref != nil {
 		modelMap["ui_href"] = model.UIHref
