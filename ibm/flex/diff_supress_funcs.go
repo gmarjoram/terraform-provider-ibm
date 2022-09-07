@@ -62,3 +62,12 @@ func SuppressHashedRawSecret(k, old, new string, d *schema.ResourceData) bool {
 	secureHmac := hex.EncodeToString(mac.Sum(nil))
 	return cmp.Equal(strings.Join([]string{"hash", "SHA3-512", secureHmac}, ":"), old)
 }
+
+func SuppressFullyQualifiedRegion(k, old, new string, d *schema.ResourceData) bool {
+	if strings.Contains(old, ":") && strings.Contains(new, ":") {
+		return old == new
+	}
+	oldRegion := old[strings.LastIndex(old, ":")+1:]
+	newRegion := new[strings.LastIndex(new, ":")+1:]
+	return oldRegion == newRegion
+}
